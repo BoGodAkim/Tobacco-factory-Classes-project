@@ -1,9 +1,15 @@
-#ifndef CLASSES_HPP
-#define CLASSES_HPP
+ #ifndef CLASSES_HPP
+ #define CLASSES_HPP
 
 #include <bits/stdc++.h>
 using std::string;
+using std::vector;
+using std::map;
 
+class Product;
+class Material;
+class Client;
+class Supplier;
 class Tobacco_Factory
 {
 private:
@@ -59,7 +65,7 @@ private:
     string address;
     string phone;
     string email;
-    map<product *, int> cart;
+    map<Product *, int> cart;
 public:
     Client();
     Client(string name, string address, string phone, string email);
@@ -105,4 +111,4 @@ public:
     void print_supplier();
 };
 
-#endif // CLASSES_HPP
+ #endif // CLASSES_HPP
