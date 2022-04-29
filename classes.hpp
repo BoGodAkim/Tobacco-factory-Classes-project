@@ -1,10 +1,10 @@
- #ifndef CLASSES_HPP
- #define CLASSES_HPP
+#ifndef CLASSES_HPP
+#define CLASSES_HPP
 
 #include <bits/stdc++.h>
+using std::map;
 using std::string;
 using std::vector;
-using std::map;
 
 class Product;
 class Material;
@@ -13,102 +13,113 @@ class Supplier;
 class Tobacco_Factory
 {
 private:
-    string name;
-    string address;
-    string phone;
-    string email;
-    string website;
-    vector<Product> products;
-    vector<Client> clients;
-    vector<Material> materials;
-    vector<Supplier> suppliers;
-    void add_product();
-    void add_client();
-    void add_material();
-    void add_supplier();
-    void update_product_price();
-    void update_material_price();
-    void make_order();
-    void make_delivery();
-    void print_products();
-    void print_clients();
-    void print_materials();
-    void print_suppliers();
-    void print_factory_info();
+    string name;                  // Name of the factory
+    string address;               // Address of the factory
+    string phone;                 // Phone number of the factory
+    string email;                 // Email of the factory
+    string website;               // Website of the factory
+    vector<Product> products;     // Vector of products
+    vector<Client> clients;       // Vector of clients
+    vector<Material> materials;   // Vector of materials
+    vector<Supplier> suppliers;   // Vector of suppliers
+    void add_product();           // Function to add a product with parameters from the manager
+    void add_client();            // Function to add a client with parameters from the manager
+    void add_material();          // Function to add a material with parameters from the manager
+    void add_supplier();          // Function to add a supplier with parameters from the manager
+    void update_product_price();  // Function call Product* chooseProduct() and call Product::updatePrice()
+    void update_material_price(); // Function call Material* chooseMaterial() and call Material::updatePrice()
+    void make_order();            // Function call Client* chooseClient(), Product* chooseProduct() and ask for the quantity of the product and call Client::addProduct_to_Cart()
+    void make_delivery();         // Function call Client* chooseClient() and call Client::deleteCart()
+    void print_products();        // Function print all products in the vector
+    void print_clients();         // Function print all clients in the vector
+    void print_materials();       // Function print all materials in the vector
+    void print_suppliers();       // Function print all suppliers in the vector
+    void print_factory_info();    // Function print information about the factory
+    Product *choose_product();    // Function choose product from the vector using function Product::showProduct() and ask for the number of the product from the manager
+    Material *choose_material();  // Function choose material from the vector using function Material::showMaterial() and ask for the number of the material from the manager
+    Supplier *choose_supplier();  // Function choose supplier from the vector using function Supplier::showSupplier() and ask for the number of the supplier from the manager
+    Client *choose_client();      // Function choose client from the vector using function Client::showClient() and ask for the number of the client from the manager
 public:
-    Tobacco_Factory();
-    void enter_menu();
+    Tobacco_Factory(); // Constructor
+    void enter_menu(); // Function to enter the menu and call the function according to the number
 };
 
 class Product
 {
 private:
-    string name;
-    string description;
-    float price;
-    int quantity;
-    map<Material *, int> materials;
+    string name;                    // Name of the product
+    string description;             // Description of the product
+    float price;                    // Price of the product
+    int quantity;                   // Quantity of the product
+    map<Material *, int> materials; // Map of materials and their quantity which are used to produce the product
+
 public:
-    Product();
-    Product(string name, string description, float price, int quantity);
-    void add_material(Material *material, int quantity);
-    void remove_material(Material *material, int quantity);
-    void update_price();
-    void update_quantity();
-    void print_product();
+    Product();                                                           // Constructor
+    Product(string name, string description, float price, int quantity); // Constructor with parameters
+    void add_material(Material *material, int quantity);                 // Function to add material to the map
+    void remove_material(Material *material, int quantity);              // Function to remove material from the map
+    void update_price();                                                 // Function to update the price of the product wchich ask for the new price from the manager and this price higher than sum of the materials prices
+    void update_quantity();                                              // Function to update the quantity of the product
+    void print_product();                                                // Function to print the product
+    void print_materials();                                              // Function to print the materials used to produce the product
 };
 
 class Client
 {
 private:
-    string name;
-    string address;
-    string phone;
-    string email;
-    map<Product *, int> cart;
+    string name;              // Name of the client
+    string address;           // Address of the client
+    string phone;             // Phone number of the client
+    string email;             // Email of the client
+    map<Product *, int> cart; // Map of products and their quantity which are in the cart
+
 public:
-    Client();
-    Client(string name, string address, string phone, string email);
-    void add_product_to_cart(Product *product, int quantity);
-    void remove_product_from_cart(Product *product, int quantity);
-    void update_cart();
-    void print_cart();
-    void print_client();
+    Client();                                                        // Constructor
+    Client(string name, string address, string phone, string email); // Constructor with parameters
+    void add_product_to_cart(Product *product, int quantity);        // Function to add product to the cart
+    void remove_product_from_cart(Product *product, int quantity);   // Function to remove product from the cart
+    void update_cart();                                              // Function to update the cart
+    void delete_cart();                                              // Function to delete the cart
+    void print_cart();                                               // Function to print the cart
+    void print_client();                                             // Function to print the client
 };
 
 class Material
 {
 private:
-    string name;
-    string description;
-    float price;
-    int quantity;
-    Supplier *supplier;
+    string name;        // Name of the material
+    string description; // Description of the material
+    float price;        // Price of the material
+    int quantity;       // Quantity of the material
+    Supplier *supplier; // Supplier of the material
+
 public:
-    Material();
-    Material(string name, string description, float price, int quantity, Supplier *supplier);
-    void update_price();
-    void update_quantity();
-    void print_material();
-    void order_material(int quantity);
+    Material();                                                                               // Constructor
+    Material(string name, string description, float price, int quantity, Supplier *supplier); // Constructor with parameters
+    void update_price();                                                                      // Function to update the price of the material with the new price from the manager
+    void update_quantity();                                                                   // Function to update the quantity of the material
+    void print_material();                                                                    // Function to print the material
+    void order_material(int quantity);                                                        // Function to order the material with the quantity
 };
 
 class Supplier
 {
 private:
-    string name;
-    string address;
-    string phone;
-    string email;
-    vector<Material*> order_list;
+    string name;                   // Name of the supplier
+    string address;                // Address of the supplier
+    string phone;                  // Phone number of the supplier
+    string email;                  // Email of the supplier
+    vector<Material *> order_list; // Vector of materials which are ordered
+
 public:
-    Supplier();
-    Supplier(string name, string address, string phone, string email);
-    void add_material_to_order_list(Material *material, int quantity);
-    void remove_material_from_order_list(Material *material, int quantity);
-    void update_order_list();
-    void print_order_list();
-    void print_supplier();
+    Supplier();                                                             // Constructor
+    Supplier(string name, string address, string phone, string email);      // Constructor with parameters
+    void add_material_to_order_list(Material *material, int quantity);      // Function to add material to the order list
+    void remove_material_from_order_list(Material *material, int quantity); // Function to remove material from the order list
+    void update_order_list();                                               // Function to update the order list
+    void delete_order_list();                                               // Function to delete the order list
+    void print_order_list();                                                // Function to print the order list
+    void print_supplier();                                                  // Function to print the supplier
 };
 
- #endif // CLASSES_HPP
+#endif // CLASSES_HPP
