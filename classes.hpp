@@ -10,7 +10,7 @@ class Product;
 class Material;
 class Client;
 class Supplier;
-class Tobacco_Factory
+class TobaccoFactory
 {
 private:
     string name;                  // Name of the factory
@@ -18,10 +18,10 @@ private:
     string phone;                 // Phone number of the factory
     string email;                 // Email of the factory
     string website;               // Website of the factory
-    vector<Product> products;     // Vector of products
-    vector<Client> clients;       // Vector of clients
-    vector<Material> materials;   // Vector of materials
-    vector<Supplier> suppliers;   // Vector of suppliers
+    vector<Product *> products;   // Vector of products
+    vector<Client *> clients;     // Vector of clients
+    vector<Material *> materials; // Vector of materials
+    vector<Supplier *> suppliers; // Vector of suppliers
     void add_product();           // Function to add a product with parameters from the manager
     void add_client();            // Function to add a client with parameters from the manager
     void add_material();          // Function to add a material with parameters from the manager
@@ -40,7 +40,7 @@ private:
     Supplier *choose_supplier();  // Function choose supplier from the vector using function Supplier::showSupplier() and ask for the number of the supplier from the manager
     Client *choose_client();      // Function choose client from the vector using function Client::showClient() and ask for the number of the client from the manager
 public:
-    Tobacco_Factory(); // Constructor
+    TobaccoFactory();  // Constructor
     void enter_menu(); // Function to enter the menu and call the function according to the number
 };
 
@@ -50,18 +50,21 @@ private:
     string name;                    // Name of the product
     string description;             // Description of the product
     float price;                    // Price of the product
-    int quantity;                   // Quantity of the product
+    float price_materials;          // Price of the materials used in the product
     map<Material *, int> materials; // Map of materials and their quantity which are used to produce the product
-
+    void calculate_price_materials(); // Function to calculate the price of the materials used in the product
 public:
+    int quantity;                                                        // Quantity of the product
     Product();                                                           // Constructor
-    Product(string name, string description, float price, int quantity); // Constructor with parameters
+    Product(const string name, const string description, const float price, const int quantity); // Constructor with parameters
     void add_material(Material *material, int quantity);                 // Function to add material to the map
     void remove_material(Material *material, int quantity);              // Function to remove material from the map
     void update_price();                                                 // Function to update the price of the product wchich ask for the new price from the manager and this price higher than sum of the materials prices
-    void update_quantity();                                              // Function to update the quantity of the product
     void print_product();                                                // Function to print the product
     void print_materials();                                              // Function to print the materials used to produce the product
+    string get_name();                                                   // Function to return the name of the product
+    float get_price();                                                   // Function to return the price of the product
+    float get_price_materials();                                         // Function to return the price of the materials used in the product
 };
 
 class Client
@@ -75,7 +78,7 @@ private:
 
 public:
     Client();                                                        // Constructor
-    Client(string name, string address, string phone, string email); // Constructor with parameters
+    Client(const string name, const string address, const string phone, const string email); // Constructor with parameters
     void add_product_to_cart(Product *product, int quantity);        // Function to add product to the cart
     void remove_product_from_cart(Product *product, int quantity);   // Function to remove product from the cart
     void update_cart();                                              // Function to update the cart
@@ -92,6 +95,7 @@ private:
     float price;        // Price of the material
     int quantity;       // Quantity of the material
     Supplier *supplier; // Supplier of the material
+    vector<Product *> products; // Vector of products which are made with the material
 
 public:
     Material();                                                                               // Constructor
@@ -100,8 +104,9 @@ public:
     void update_quantity();                                                                   // Function to update the quantity of the material
     void print_material();                                                                    // Function to print the material
     void order_material(int quantity);                                                        // Function to order the material with the quantity
+    float get_price();                                                                        // Function to return the price of the material
+    string get_name();                                                                        // Function to return the name of the material
 };
-
 class Supplier
 {
 private:
