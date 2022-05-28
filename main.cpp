@@ -461,6 +461,161 @@ Client *TobaccoFactory::choose_client()
     return this->clients[index - 1];
 }
 
+void TobaccoFactory::save_to_file(const string fold_name /*= "data/"*/)
+{
+    map<Supplier *, int> supplierID;
+    map<Material *, int> materialID;
+    map<Product *, int> productID;
+    map<Client *, int> clientID;
+    int id = 0;
+    for (auto it = this->suppliers.begin(); it != this->suppliers.end(); it++)
+    {
+        supplierID[*it] = id;
+        id++;
+    }
+    id = 0;
+    for (auto it = this->materials.begin(); it != this->materials.end(); it++)
+    {
+        materialID[*it] = id;
+        id++;
+    }
+    id = 0;
+    for (auto it = this->products.begin(); it != this->products.end(); it++)
+    {
+        productID[*it] = id;
+        id++;
+    }
+    id = 0;
+    for (auto it = this->clients.begin(); it != this->clients.end(); it++)
+    {
+        clientID[*it] = id;
+        id++;
+    }
+    ofstream file(fold_name + "tobacco_factory.txt");
+    file << this->name << endl
+         << this->address << endl
+         << this->phone << endl
+         << this->email << endl
+         << this->website << endl;
+    file.close();
+
+    file.open(fold_name + "suppliers.txt");
+    file << "SupplierID,Name,Address,Phone,Email" << endl;
+    for (auto it = this->suppliers.begin(); it != this->suppliers.end(); it++)
+    {
+        (*it)->save_to_file(file, supplierID[*it]);
+    }
+    file.close();
+
+    file.open(fold_name + "client.txt");
+    file << "ClientID,Name,Address,Phone,Email" << endl;
+    for (auto it = this->clients.begin(); it != this->clients.end(); it++)
+    {
+        (*it)->save_to_file(file, clientID[*it]);
+    }
+    file.close();
+
+    file.open(fold_name + "material.txt");
+    file << "MaterialID,SupplierID,Name,Description,Price,Quantity" << endl;
+    for (auto it = this->materials.begin(); it != this->materials.end(); it++)
+    {
+        (*it)->save_to_file(file, materialID[*it], &supplierID);
+    }
+    file.close();
+
+    file.open(fold_name + "product.txt");
+    file << "ProductID,Name,Description,Price,Price_of_materials,Quantity" << endl;
+    ofstream file_product_material(fold_name + "product_material.txt");
+    file_product_material << "ProductID,MaterialID,Quantity" << endl;
+    for (auto it = this->products.begin(); it != this->products.end(); it++)
+    {
+        (*it)->save_to_file(file, productID[*it], &materialID, file_product_material);
+    }
+}
+
+void TobaccoFactory::load_from_file(const string foldName /*= "data/"*/)
+{
+    map<int, Supplier *> supplierID;
+    map<int, Material *> materialID;
+    map<int, Product *> productID;
+    map<int, Client *> clientID;
+
+    ifstream file(foldName + "tobacco_factory.txt");
+    string line;
+    getline(file, line);
+    this->name = line;
+    getline(file, line);
+    this->address = line;
+    getline(file, line);
+    this->phone = line;
+    getline(file, line);
+    this->email = line;
+    getline(file, line);
+    this->website = line;
+    file.close();
+
+    file.open(foldName + "suppliers.txt");
+    getline(file, line);
+    while (getline(file, line))
+    {
+        Supplier *supplier = new Supplier();
+        this->suppliers.push_back(supplier);
+        istringstream iss(line);
+        this->suppliers.back()->load_from_file(iss, &supplierID);
+    }
+    file.close();
+
+    file.open(foldName + "client.txt");
+    getline(file, line);
+    while (getline(file, line))
+    {
+        Client *client = new Client();
+        this->clients.push_back(client);
+        istringstream iss(line);
+        this->clients.back()->load_from_file(iss, &clientID);
+    }
+    file.close();
+
+    file.open(foldName + "material.txt");
+    getline(file, line);
+    while (getline(file, line))
+    {
+        Material *material = new Material();
+        this->materials.push_back(material);
+        istringstream iss(line);
+        this->materials.back()->load_from_file(iss, &materialID, &supplierID);
+    }
+    file.close();
+
+    file.open(foldName + "product.txt");
+    getline(file, line);
+    while (getline(file, line))
+    {
+        Product *product = new Product();
+        this->products.push_back(product);
+        istringstream iss(line);
+        this->products.back()->load_from_file(iss, &productID);
+    }
+    file.close();
+
+    file.open(foldName + "product_material.txt");
+    getline(file, line);
+    while (getline(file, line))
+    {
+        istringstream iss(line);
+        int product_ID, material_ID, quantity;
+        string value;
+        getline(iss, value, ',');
+        product_ID = stoi(value);
+        getline(iss, value, ',');
+        material_ID = stoi(value);
+        getline(iss, value, ',');
+        quantity = stoi(value);
+        productID[product_ID]->add_material(materialID[material_ID], quantity);
+    }
+    file.close();
+}
+
 Product::Product()
 {
     this->quantity = 0;
@@ -599,6 +754,30 @@ float Product::get_price_materials()
     return this->price_materials;
 }
 
+void Product::save_to_file(ofstream &file, int productID, map<Material *, int> *materialID, ofstream &file_product_material)
+{
+    file << productID << "," << this->name << "," << this->description << "," << this->price << "," << this->price_materials << "," << this->quantity << endl;
+    for (auto it = this->materials.begin(); it != this->materials.end(); it++)
+    {
+        file_product_material << productID << "," << (*materialID)[it->first] << "," << it->second << endl;
+    }
+}
+
+void Product::load_from_file(istringstream &iss, map<int, Product *> *productID)
+{
+    string value;
+    getline(iss, value, ',');
+    (*productID)[stoi(value)] = this;
+    getline(iss, this->name, ',');
+    getline(iss, this->description, ',');
+    getline(iss, value, ',');
+    this->price = stof(value);
+    getline(iss, value, ',');
+    this->price_materials = stof(value);
+    getline(iss, value, ',');
+    this->quantity = stoi(value);
+}
+
 Client::Client()
 {
 }
@@ -720,6 +899,22 @@ float Client::calculate_total_price_materials()
     return total_price_materials;
 }
 
+void Client::save_to_file(ofstream &file, int clientID)
+{
+    file << clientID << "," << this->name << "," << this->address << "," << this->phone << "," << this->email << endl;
+}
+
+void Client::load_from_file(istringstream &iss, map<int, Client *> *clientID)
+{
+    string value;
+    getline(iss, value, ',');
+    (*clientID)[stoi(value)] = this;
+    getline(iss, this->name, ',');
+    getline(iss, this->address, ',');
+    getline(iss, this->phone, ',');
+    getline(iss, this->email, ',');
+}
+
 Material::Material()
 {
     this->price = 0;
@@ -796,6 +991,26 @@ string Material::get_name()
     return this->name;
 }
 
+void Material::save_to_file(ofstream &file, int materialID, map<Supplier *, int> *supplierID)
+{
+    file << materialID << "," << (*supplierID)[this->supplier] << "," << this->name << "," << this->description << "," << this->price << "," << this->quantity << endl;
+}
+
+void Material::load_from_file(istringstream &iss, map<int, Material *> *materialID, map<int, Supplier *> *supplierID)
+{
+    string value;
+    getline(iss, value, ',');
+    (*materialID)[stoi(value)] = this;
+    getline(iss, value, ',');
+    this->supplier = (*supplierID)[stoi(value)];
+    getline(iss, this->name, ',');
+    getline(iss, this->description, ',');
+    getline(iss, value, ',');
+    this->price = stof(value);
+    getline(iss, value, ',');
+    this->quantity = stoi(value);
+}
+
 Supplier::Supplier()
 {
 }
@@ -840,6 +1055,22 @@ void Supplier::print_materials()
 string Supplier::get_name()
 {
     return this->name;
+}
+
+void Supplier::save_to_file(ofstream &file, int supplierID)
+{
+    file << supplierID << "," << this->name << "," << this->address << "," << this->phone << "," << this->email << endl;
+}
+
+void Supplier::load_from_file(istringstream &iss, map<int, Supplier *> *supplierID)
+{
+    string value;
+    getline(iss, value, ',');
+    (*supplierID)[stoi(value)] = this;
+    getline(iss, this->name, ',');
+    getline(iss, this->address, ',');
+    getline(iss, this->phone, ',');
+    getline(iss, this->email, ',');
 }
 
 int main()
