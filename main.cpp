@@ -1003,6 +1003,7 @@ void Material::load_from_file(istringstream &iss, map<int, Material *> *material
     (*materialID)[stoi(value)] = this;
     getline(iss, value, ',');
     this->supplier = (*supplierID)[stoi(value)];
+    this->supplier->add_material(this);
     getline(iss, this->name, ',');
     getline(iss, this->description, ',');
     getline(iss, value, ',');
