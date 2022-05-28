@@ -9,7 +9,7 @@ TobaccoFactory::TobaccoFactory()
     while (choice != 1 && choice != 2)
     {
         cout << "Enter your choice: ";
-        cin >> value;
+        getline(cin, value);
         choice = stoi(value);
     }
     switch (choice)
@@ -95,6 +95,9 @@ void TobaccoFactory::enter_menu()
         case 12:
             print_factory_info();
             break;
+        case 13:
+            save_to_file();
+            break;
         case 0:
             return;
         default:
@@ -111,22 +114,20 @@ void TobaccoFactory::add_product()
     string value;
     string name;
     string description;
-    int price;
+    float price;
     cout << "Enter the name of the product: ";
     getline(cin, name);
     cout << "Enter description of the product: ";
     getline(cin, description);
-    cout << "Enter the price of the product: ";
-    getline(cin, value);
-    price = stof(value);
-    products.push_back(new Product(name, description, price, 0));
+    products.push_back(new Product(name, description, 0, 0));
     this->print_materials();
     int choice = -1;
     while (choice != 0)
     {
         Material *material = NULL;
         cout << "1. Choose Material" << endl
-             << "2. Add Material" << endl;
+             << "2. Add Material" << endl
+             << "0. Exit" << endl;
         cout << "Enter your choice: ";
         getline(cin, value);
         choice = stoi(value);
@@ -154,6 +155,8 @@ void TobaccoFactory::add_product()
             cout << "Invalid choice!" << endl;
         }
     }
+    this->products.back()->print_materials();
+    this->products.back()->update_price();
     cout << "Product added!" << endl
          << endl;
 }
@@ -182,7 +185,7 @@ void TobaccoFactory::add_material()
     string value;
     string name;
     string description;
-    int price;
+    float price;
     cout << "Enter the name of the material: ";
     getline(cin, name);
     cout << "Enter description of the material: ";
@@ -275,27 +278,29 @@ void TobaccoFactory::make_order()
             client->print_cart();
             cout << "Total price: " << client->calculate_total_price() << endl
                  << "Prepayment: " << client->calculate_total_price_materials() << endl;
-            int choice = -1;
-            while (choice != 0)
+            int choice2 = -1;
+            while (choice2 != 0)
             {
                 cout << "1. Pay" << endl
                      << "2. Cancel" << endl
                      << "0. Back" << endl;
                 cout << "Enter your choice: ";
                 getline(cin, value);
-                choice = stoi(value);
-                switch (choice)
+                choice2 = stoi(value);
+                switch (choice2)
                 {
                 case 1:
                     this->make_delivery(client);
                     cout << "Order completed!" << endl;
+                    choice = 3;
                     break;
                 case 2:
                     client->delete_cart();
                     cout << "Order deleted!" << endl;
+                    choice = 3;
                     break;
                 case 0:
-                    choice = 0;
+                    choice2 = 0;
                     break;
                 default:
                     cout << "Invalid choice!" << endl;
@@ -352,7 +357,6 @@ void TobaccoFactory::make_delivery(Client *client)
             break;
         }
     }
-    client->delete_cart();
 }
 
 void TobaccoFactory::print_products()
@@ -411,7 +415,7 @@ Product *TobaccoFactory::choose_product()
         cout << "Enter the index of the product: ";
         getline(cin, value);
         index = stoi(value);
-        if (index < 0 || index >= this->products.size())
+        if (index < 1 || index > this->products.size())
         {
             cout << "Invalid index!" << endl;
         }
@@ -430,7 +434,7 @@ Material *TobaccoFactory::choose_material()
         cout << "Enter the index of the material: ";
         getline(cin, value);
         index = stoi(value);
-        if (index < 0 || index >= this->materials.size())
+        if (index < 1 || index > this->materials.size())
         {
             cout << "Invalid index!" << endl;
         }
@@ -449,7 +453,7 @@ Supplier *TobaccoFactory::choose_supplier()
         cout << "Enter the index of the supplier: ";
         getline(cin, value);
         index = stoi(value);
-        if (index < 0 || index >= this->suppliers.size())
+        if (index < 1 || index > this->suppliers.size())
         {
             cout << "Invalid index!" << endl;
         }
@@ -468,7 +472,7 @@ Client *TobaccoFactory::choose_client()
         cout << "Enter the index of the client: ";
         getline(cin, value);
         index = stoi(value);
-        if (index < 0 || index >= this->clients.size())
+        if (index < 1 || index > this->clients.size())
         {
             cout << "Invalid index!" << endl;
         }
@@ -514,7 +518,7 @@ void TobaccoFactory::save_to_file(const string fold_name /*= "data/"*/)
          << this->website << endl;
     file.close();
 
-    file.open(fold_name + "suppliers.txt");
+    file.open(fold_name + "suppliers.csv");
     file << "SupplierID,Name,Address,Phone,Email" << endl;
     for (auto it = this->suppliers.begin(); it != this->suppliers.end(); it++)
     {
@@ -522,7 +526,7 @@ void TobaccoFactory::save_to_file(const string fold_name /*= "data/"*/)
     }
     file.close();
 
-    file.open(fold_name + "client.txt");
+    file.open(fold_name + "client.csv");
     file << "ClientID,Name,Address,Phone,Email" << endl;
     for (auto it = this->clients.begin(); it != this->clients.end(); it++)
     {
@@ -530,7 +534,7 @@ void TobaccoFactory::save_to_file(const string fold_name /*= "data/"*/)
     }
     file.close();
 
-    file.open(fold_name + "material.txt");
+    file.open(fold_name + "material.csv");
     file << "MaterialID,SupplierID,Name,Description,Price,Quantity" << endl;
     for (auto it = this->materials.begin(); it != this->materials.end(); it++)
     {
@@ -538,9 +542,9 @@ void TobaccoFactory::save_to_file(const string fold_name /*= "data/"*/)
     }
     file.close();
 
-    file.open(fold_name + "product.txt");
+    file.open(fold_name + "product.csv");
     file << "ProductID,Name,Description,Price,Price_of_materials,Quantity" << endl;
-    ofstream file_product_material(fold_name + "product_material.txt");
+    ofstream file_product_material(fold_name + "product_material.csv");
     file_product_material << "ProductID,MaterialID,Quantity" << endl;
     for (auto it = this->products.begin(); it != this->products.end(); it++)
     {
@@ -569,7 +573,7 @@ void TobaccoFactory::load_from_file(const string foldName /*= "data/"*/)
     this->website = line;
     file.close();
 
-    file.open(foldName + "suppliers.txt");
+    file.open(foldName + "suppliers.csv");
     getline(file, line);
     while (getline(file, line))
     {
@@ -580,7 +584,7 @@ void TobaccoFactory::load_from_file(const string foldName /*= "data/"*/)
     }
     file.close();
 
-    file.open(foldName + "client.txt");
+    file.open(foldName + "client.csv");
     getline(file, line);
     while (getline(file, line))
     {
@@ -591,7 +595,7 @@ void TobaccoFactory::load_from_file(const string foldName /*= "data/"*/)
     }
     file.close();
 
-    file.open(foldName + "material.txt");
+    file.open(foldName + "material.csv");
     getline(file, line);
     while (getline(file, line))
     {
@@ -602,7 +606,7 @@ void TobaccoFactory::load_from_file(const string foldName /*= "data/"*/)
     }
     file.close();
 
-    file.open(foldName + "product.txt");
+    file.open(foldName + "product.csv");
     getline(file, line);
     while (getline(file, line))
     {
@@ -613,7 +617,7 @@ void TobaccoFactory::load_from_file(const string foldName /*= "data/"*/)
     }
     file.close();
 
-    file.open(foldName + "product_material.txt");
+    file.open(foldName + "product_material.csv");
     getline(file, line);
     while (getline(file, line))
     {

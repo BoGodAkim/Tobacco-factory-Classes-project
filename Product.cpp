@@ -85,7 +85,10 @@ void Product::calculate_price_materials()
     {
         temp_price_materials += it->first->get_price() * it->second;
     }
-    this->price = temp_price_materials * (this->price / this->price_materials);
+    if (this->price_materials != 0) //TODO: rewrite
+    {
+        this->price = temp_price_materials * (this->price / this->price_materials);
+    }
     this->price_materials = temp_price_materials;
 }
 
