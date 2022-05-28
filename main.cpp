@@ -32,13 +32,12 @@ void TobaccoFactory::enter_menu()
         cout << "5. Update product price" << endl;
         cout << "6. Update material price" << endl;
         cout << "7. Make an order" << endl;
-        cout << "8. Make a delivery" << endl;
-        cout << "9. Print products" << endl;
-        cout << "10. Print clients" << endl;
-        cout << "11. Print materials" << endl;
-        cout << "12. Print suppliers" << endl;
-        cout << "13. Print factory info" << endl;
-        cout << "14. Exit" << endl;
+        cout << "8. Print products" << endl;
+        cout << "9. Print clients" << endl;
+        cout << "10. Print materials" << endl;
+        cout << "11. Print suppliers" << endl;
+        cout << "12. Print factory info" << endl;
+        cout << "0. Exit" << endl;
         cout << "Enter your choice: ";
         getline(cin, value);
         choice = stoi(value);
@@ -67,24 +66,21 @@ void TobaccoFactory::enter_menu()
             make_order();
             break;
         case 8:
-            make_delivery();
-            break;
-        case 9:
             print_products();
             break;
-        case 10:
+        case 9:
             print_clients();
             break;
-        case 11:
+        case 10:
             print_materials();
             break;
-        case 12:
+        case 11:
             print_suppliers();
             break;
-        case 13:
+        case 12:
             print_factory_info();
             break;
-        case 14:
+        case 0:
             return;
         default:
             cout << "Invalid choice!" << endl;
@@ -241,12 +237,106 @@ void TobaccoFactory::update_material_price()
 void TobaccoFactory::make_order()
 {
     Client *client = this->choose_client();
-    client->update_cart();
+    int choice = -1;
+    while (choice != 3)
+    {
+        cout << "1. Add to cart" << endl
+             << "2. Remove from cart" << endl
+             << "3. Order" << endl;
+        string value;
+        cout << "Enter your choice: ";
+        getline(cin, value);
+        choice = stoi(value);
+        switch (choice)
+        {
+        case 1:
+            this->add_to_cart(client);
+            break;
+        case 2:
+            client->remove_product_from_cart();
+            break;
+        case 3:
+        {
+            client->print_cart();
+            cout << "Total price: " << client->calculate_total_price() << endl
+                 << "Prepayment: " << client->calculate_total_price_materials() << endl;
+            int choice = -1;
+            while (choice != 0)
+            {
+                cout << "1. Pay" << endl
+                     << "2. Cancel" << endl
+                     << "0. Back" << endl;
+                cout << "Enter your choice: ";
+                getline(cin, value);
+                choice = stoi(value);
+                switch (choice)
+                {
+                case 1:
+                    this->make_delivery(client);
+                    cout << "Order completed!" << endl;
+                    break;
+                case 2:
+                    client->delete_cart();
+                    cout << "Order deleted!" << endl;
+                    break;
+                case 0:
+                    choice = 0;
+                    break;
+                default:
+                    cout << "Invalid choice!" << endl;
+                }
+            }
+            return;
+        }
+        default:
+            cout << "Invalid choice!" << endl;
+            break;
+        }
+    }
 }
 
-void TobaccoFactory::make_delivery()
+void TobaccoFactory::add_to_cart(Client *client)
 {
-    Client *client = this->choose_client();
+    Product *product = this->choose_product();
+    int quantity = 0;
+    while (quantity <= 0)
+    {
+        cout << "Enter the quantity of the product: ";
+        string value;
+        getline(cin, value);
+        quantity = stoi(value);
+    }
+    client->add_product_to_cart(product, quantity);
+}
+
+void TobaccoFactory::make_delivery(Client *client)
+{
+    client->make_products();
+    cout << "Order is ready!" << endl;
+    int choice = -1;
+    while (choice != 1 || choice != 2)
+    {
+        cout << "1. Pay" << endl
+             << "2. Cancel" << endl;
+        cout << "Enter your choice: ";
+        string value;
+        getline(cin, value);
+        choice = stoi(value);
+        switch (choice)
+        {
+        case 1:
+            client->deliver_order();
+            cout << "Payment completed!" << endl;
+            break;
+        case 2:
+            client->delete_cart();
+            cout << "Order canceled!" << endl;
+            break;
+        default:
+            cout << "Invalid choice!" << endl;
+            break;
+        }
+    }
     client->delete_cart();
 }
 
@@ -284,6 +374,15 @@ void TobaccoFactory::print_suppliers()
     {
         (*it)->print_supplier();
     }
+}
+
+void TobaccoFactory::print_factory_info()
+{
+    cout << "Tobacco Factory:" << endl;
+    cout << "Name: " << this->name << endl;
+    cout << "Address: " << this->address << endl;
+    cout << "Phone: " << this->phone << endl;
+    cout << "Email: " << this->email << endl;
 }
 
 Product *TobaccoFactory::choose_product()
@@ -379,18 +478,48 @@ Product::Product(const string name, const string description, const float price,
 void Product::add_material(Material *material, int quantity)
 {
     this->materials[material] += quantity;
+    material->add_product(this);
     this->calculate_price_materials();
 }
 
-void Product::remove_material(Material *material, int quantity)
+void Product::remove_material()
 {
-    if (this->materials[material] < quantity)
+    cout << "Choose the material: " << endl;
+    this->print_materials();
+    string value;
+    int index = -1;
+    while (index < 1 || index > this->materials.size())
     {
-        cout << "Not enough materials!" << endl;
-        return;
+        cout << "Enter the index of the material: ";
+        getline(cin, value);
+        index = stoi(value);
+        if (index < 0 || index >= this->materials.size())
+        {
+            cout << "Invalid index!" << endl;
+        }
     }
-    this->materials[material] -= quantity;
-    this->calculate_price_materials();
+    auto it = this->materials.begin();
+    for (int i = 0; i < index - 1; i++)
+    {
+        it++;
+    }
+    int quantity = -1;
+    while (quantity < 0 || quantity > (*it).second)
+    {
+        cout << "Enter the quantity of the material: ";
+        getline(cin, value);
+        quantity = stoi(value);
+        if (quantity < 0 || quantity > (*it).second)
+        {
+            cout << "Invalid quantity!" << endl;
+        }
+    }
+    (*it).second -= quantity;
+    if ((*it).second == 0)
+    {
+        (*it).first->delete_product(this);
+        this->materials.erase(it);
+    }
 }
 
 void Product::update_price()
@@ -400,7 +529,7 @@ void Product::update_price()
     string value;
     while (new_price < price_materials)
     {
-        cout << "Enter the new price: ";
+        cout << "Enter the new price (price of materials " << price_materials << "): ";
         getline(cin, value);
         new_price = stof(value);
         if (new_price < price_materials)
@@ -412,11 +541,13 @@ void Product::update_price()
 
 void Product::calculate_price_materials()
 {
-    this->price_materials = 0;
+    float temp_price_materials = 0;
     for (auto it = this->materials.begin(); it != this->materials.end(); it++)
     {
-        this->price_materials += it->first->get_price() * it->second;
+        temp_price_materials += it->first->get_price() * it->second;
     }
+    this->price = temp_price_materials * (this->price / this->price_materials);
+    this->price_materials = temp_price_materials;
 }
 
 void Product::print_product()
@@ -439,6 +570,35 @@ void Product::print_materials()
     }
 }
 
+void Product::make(int quantity)
+{
+    for (auto it = this->materials.begin(); it != this->materials.end(); it++)
+    {
+        int temp_quantity = it->second * quantity - it->first->quantity;
+        if (temp_quantity > 0)
+        {
+            it->first->quantity += temp_quantity;
+        }
+        it->first->quantity -= it->second * quantity;
+    }
+    this->quantity += quantity;
+}
+
+string Product::get_name()
+{
+    return this->name;
+}
+
+float Product::get_price()
+{
+    return this->price;
+}
+
+float Product::get_price_materials()
+{
+    return this->price_materials;
+}
+
 Client::Client()
 {
 }
@@ -456,14 +616,43 @@ void Client::add_product_to_cart(Product *product, int quantity)
     this->cart[product] += quantity;
 }
 
-void Client::remove_product_from_cart(Product *product, int quantity)
+void Client::remove_product_from_cart()
 {
-    if (this->cart[product] < quantity)
+    cout << "Choose the product: " << endl;
+    this->print_cart();
+    string value;
+    int index = -1;
+    while (index < 1 || index > this->cart.size())
     {
-        cout << "Not enough products in the cart!" << endl;
-        return;
+        cout << "Enter the index of the product: ";
+        getline(cin, value);
+        index = stoi(value);
+        if (index < 0 || index >= this->cart.size())
+        {
+            cout << "Invalid index!" << endl;
+        }
     }
-    this->cart[product] -= quantity;
+    auto it = this->cart.begin();
+    for (int i = 0; i < index - 1; i++)
+    {
+        it++;
+    }
+    int quantity = -1;
+    while (quantity < 1 || quantity > it->second)
+    {
+        cout << "Enter the quantity: ";
+        getline(cin, value);
+        quantity = stoi(value);
+        if (quantity < 1 || quantity > it->second)
+        {
+            cout << "Invalid quantity!" << endl;
+        }
+    }
+    it->second -= quantity;
+    if (it->second == 0)
+    {
+        this->cart.erase(it);
+    }
 }
 
 void Client::print_client()
@@ -483,4 +672,178 @@ void Client::print_cart()
     {
         cout << it->first->get_name() << ": " << it->second << endl;
     }
+}
+
+void Client::delete_cart()
+{
+    this->cart.clear();
+}
+
+void Client::make_products()
+{
+    for (auto it = this->cart.begin(); it != this->cart.end(); it++)
+    {
+        int quantity = it->second - it->first->quantity;
+        if (quantity > 0)
+        {
+            it->first->make(quantity);
+        }
+    }
+}
+
+void Client::deliver_order()
+{
+    for (auto it = this->cart.begin(); it != this->cart.end(); it++)
+    {
+        it->first->quantity -= it->second;
+    }
+    this->delete_cart();
+}
+
+float Client::calculate_total_price()
+{
+    float total_price = 0;
+    for (auto it = this->cart.begin(); it != this->cart.end(); it++)
+    {
+        total_price += it->first->get_price() * it->second;
+    }
+    return total_price;
+}
+
+float Client::calculate_total_price_materials()
+{
+    float total_price_materials = 0;
+    for (auto it = this->cart.begin(); it != this->cart.end(); it++)
+    {
+        total_price_materials += it->first->get_price_materials() * it->second;
+    }
+    return total_price_materials;
+}
+
+Material::Material()
+{
+    this->price = 0;
+    this->quantity = 0;
+}
+
+Material::Material(const string name, const string description, const float price, const int quantity, Supplier *supplier)
+{
+    this->name = name;
+    this->description = description;
+    this->price = price;
+    this->quantity = quantity;
+    this->supplier = supplier;
+}
+
+void Material::add_product(Product *product)
+{
+    this->products.push_back(product);
+}
+
+void Material::delete_product(Product *product)
+{
+    this->products.erase(remove(this->products.begin(), this->products.end(), product), this->products.end());
+}
+
+void Material::update_price()
+{
+    string value;
+    float new_price = -1;
+    while (new_price < 0)
+    {
+        cout << "Enter the new price: ";
+        getline(cin, value);
+        new_price = stof(value);
+        if (new_price < 0)
+        {
+            cout << "Invalid price!" << endl;
+        }
+    }
+    this->price = new_price;
+    for (auto it = this->products.begin(); it != this->products.end(); it++)
+    {
+        (*it)->calculate_price_materials();
+    }
+}
+
+void Material::print_material()
+{
+    cout << "Name: " << this->name << endl
+         << "Description: " << this->description << endl
+         << "Price: " << this->price << endl
+         << "Quantity: " << this->quantity << endl
+         << "Supplier: " << this->supplier->get_name() << endl
+         << "Products: " << this->products.size() << endl;
+    this->print_products();
+    cout << endl;
+}
+
+void Material::print_products()
+{
+    for (auto it = this->products.begin(); it != this->products.end(); it++)
+    {
+        cout << (*it)->get_name() << endl;
+    }
+}
+
+float Material::get_price()
+{
+    return this->price;
+}
+
+string Material::get_name()
+{
+    return this->name;
+}
+
+Supplier::Supplier()
+{
+}
+
+Supplier::Supplier(const string name, const string address, const string phone, const string email)
+{
+    this->name = name;
+    this->address = address;
+    this->phone = phone;
+    this->email = email;
+}
+
+void Supplier::add_material(Material *material)
+{
+    this->materials.push_back(material);
+}
+
+void Supplier::delete_material(Material *material)
+{
+    this->materials.erase(remove(this->materials.begin(), this->materials.end(), material), this->materials.end());
+}
+
+void Supplier::print_supplier()
+{
+    cout << "Name: " << this->name << endl
+         << "Address: " << this->address << endl
+         << "Phone: " << this->phone << endl
+         << "Email: " << this->email << endl
+         << "Materials: " << this->materials.size() << endl;
+    this->print_materials();
+    cout << endl;
+}
+
+void Supplier::print_materials()
+{
+    for (auto it = this->materials.begin(); it != this->materials.end(); it++)
+    {
+        cout << (*it)->get_name() << endl;
+    }
+}
+
+string Supplier::get_name()
+{
+    return this->name;
+}
+
+int main()
+{
+    TobaccoFactory tf;
+    tf.enter_menu();
 }
