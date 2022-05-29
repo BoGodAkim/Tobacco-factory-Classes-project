@@ -292,11 +292,13 @@ void TobaccoFactory::make_order()
                 case 1:
                     this->make_delivery(client);
                     cout << "Order completed!" << endl;
+                    choice2 = 0;
                     choice = 3;
                     break;
                 case 2:
                     client->delete_cart();
                     cout << "Order deleted!" << endl;
+                    choice2 = 0;
                     choice = 3;
                     break;
                 case 0:
@@ -333,8 +335,9 @@ void TobaccoFactory::make_delivery(Client *client)
 {
     client->make_products();
     cout << "Order is ready!" << endl;
+    cout << "Cost: " << client->calculate_total_price() - client->calculate_total_price_materials() << endl;
     int choice = -1;
-    while (choice != 1 || choice != 2)
+    while (choice != 1 && choice != 2)
     {
         cout << "1. Pay" << endl
              << "2. Cancel" << endl;
@@ -362,36 +365,48 @@ void TobaccoFactory::make_delivery(Client *client)
 void TobaccoFactory::print_products()
 {
     cout << "Products:" << endl;
+    int i = 1;
     for (auto it = this->products.begin(); it != this->products.end(); it++)
     {
+        cout << "Index: " << i << endl;
         (*it)->print_product();
+        i++;
     }
 }
 
 void TobaccoFactory::print_clients()
 {
     cout << "Clients:" << endl;
+    int i = 1;
     for (auto it = this->clients.begin(); it != this->clients.end(); it++)
     {
+        cout << "Index: " << i << endl;
         (*it)->print_client();
+        i++;
     }
 }
 
 void TobaccoFactory::print_materials()
 {
     cout << "Materials:" << endl;
+    int i = 1;
     for (auto it = this->materials.begin(); it != this->materials.end(); it++)
     {
+        cout << "Index: " << i << endl;
         (*it)->print_material();
+        i++;
     }
 }
 
 void TobaccoFactory::print_suppliers()
 {
     cout << "Suppliers:" << endl;
+    int i = 1;
     for (auto it = this->suppliers.begin(); it != this->suppliers.end(); it++)
     {
+        cout << "Index: " << i << endl;
         (*it)->print_supplier();
+        i++;
     }
 }
 

@@ -2,3 +2,4 @@ MaterialID,SupplierID,Name,Description,Price,Quantity
 0,1,Small Filter,Small filter,0.12,0
 1,2,Cheap Weed 2g,Cheap weed 2g,0.27,0
 2,0,Small Paper,Smal paper,0.08,0
+3,2,Weed 5g,weed 5g,0.3,0

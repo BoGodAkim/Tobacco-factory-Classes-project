@@ -60,9 +60,12 @@ void Material::print_material()
 
 void Material::print_products()
 {
+    int i = 1;
     for (auto it = this->products.begin(); it != this->products.end(); it++)
     {
+        cout << "Index: " << i << " ";
         cout << (*it)->get_name() << endl;
+        i++;
     }
 }
 

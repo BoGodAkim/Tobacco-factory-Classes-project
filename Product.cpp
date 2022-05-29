@@ -106,9 +106,12 @@ void Product::print_product()
 
 void Product::print_materials()
 {
+    int i = 1;
     for (auto it = this->materials.begin(); it != this->materials.end(); it++)
     {
+        cout << "Index: " << i << " ";
         cout << it->first->get_name() << ": " << it->second << "(" << it->second * it->first->get_price() << "$)" << endl;
+        i++;
     }
 }
 

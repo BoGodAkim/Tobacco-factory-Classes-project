@@ -35,9 +35,12 @@ void Supplier::print_supplier()
 
 void Supplier::print_materials()
 {
+    int i = 1;
     for (auto it = this->materials.begin(); it != this->materials.end(); it++)
     {
+        cout << "Index: " << i << " ";
         cout << (*it)->get_name() << endl;
+        i++;
     }
 }
 

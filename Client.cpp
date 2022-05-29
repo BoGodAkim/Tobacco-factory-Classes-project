@@ -28,7 +28,7 @@ void Client::remove_product_from_cart()
         cout << "Enter the index of the product: ";
         getline(cin, value);
         index = stoi(value);
-        if (index < 0 || index >= this->cart.size())
+        if (index < 1 || index > this->cart.size())
         {
             cout << "Invalid index!" << endl;
         }
@@ -69,9 +69,12 @@ void Client::print_client()
 
 void Client::print_cart()
 {
+    int i = 1;
     for (auto it = this->cart.begin(); it != this->cart.end(); it++)
     {
+        cout << "Index: " << i << " ";
         cout << it->first->get_name() << ": " << it->second << endl;
+        i++;
     }
 }
 
