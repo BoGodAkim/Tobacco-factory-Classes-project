@@ -76,6 +76,7 @@ void Product::update_price()
             cout << "Invalid price!" << endl;
         }
     }
+    this->price = new_price;
 }
 
 void Product::calculate_price_materials()
