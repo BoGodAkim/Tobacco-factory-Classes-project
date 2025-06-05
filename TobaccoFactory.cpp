@@ -134,21 +134,27 @@ void TobaccoFactory::add_product()
         if (choice == 1)
         {
             material = this->choose_material();
-            cout << "Enter the quantity of the material: ";
-            getline(cin, value);
-            int quantity = stoi(value);
-            this->products.back()->add_material(material, quantity);
-            cout << endl;
+            if (material)
+            {
+                cout << "Enter the quantity of the material: ";
+                getline(cin, value);
+                int quantity = stoi(value);
+                this->products.back()->add_material(material, quantity);
+                cout << endl;
+            }
         }
         else if (choice == 2)
         {
             this->add_material();
-            material = this->materials.back();
-            cout << "Enter the quantity of the material: ";
-            getline(cin, value);
-            int quantity = stoi(value);
-            this->products.back()->add_material(material, quantity);
-            cout << endl;
+            if (!this->materials.empty())
+            {
+                material = this->materials.back();
+                cout << "Enter the quantity of the material: ";
+                getline(cin, value);
+                int quantity = stoi(value);
+                this->products.back()->add_material(material, quantity);
+                cout << endl;
+            }
         }
         else
         {
@@ -216,6 +222,11 @@ void TobaccoFactory::add_material()
             cout << "Invalid choice!" << endl;
         }
     }
+    if (!supplier)
+    {
+        cout << "Material not added!" << endl << endl;
+        return;
+    }
     this->materials.push_back(new Material(name, description, price, 0, supplier));
     cout << "Material added!" << endl
          << endl;
@@ -243,18 +254,28 @@ void TobaccoFactory::add_supplier()
 void TobaccoFactory::update_product_price()
 {
     Product *product = this->choose_product();
-    product->update_price();
+    if (product)
+    {
+        product->update_price();
+    }
 }
 
 void TobaccoFactory::update_material_price()
 {
     Material *material = this->choose_material();
-    material->update_price();
+    if (material)
+    {
+        material->update_price();
+    }
 }
 
 void TobaccoFactory::make_order()
 {
     Client *client = this->choose_client();
+    if (!client)
+    {
+        return;
+    }
     int choice = -1;
     while (choice != 3)
     {
@@ -320,6 +341,10 @@ void TobaccoFactory::make_order()
 void TobaccoFactory::add_to_cart(Client *client)
 {
     Product *product = this->choose_product();
+    if (!product)
+    {
+        return;
+    }
     int quantity = 0;
     while (quantity <= 0)
     {
@@ -423,6 +448,11 @@ Product *TobaccoFactory::choose_product()
 {
     cout << "Choose the product: " << endl;
     this->print_products();
+    if (this->products.empty())
+    {
+        cout << "No products available!" << endl;
+        return nullptr;
+    }
     string value;
     int index = -1;
     while (index < 1 || index > this->products.size())
@@ -442,6 +472,11 @@ Material *TobaccoFactory::choose_material()
 {
     cout << "Choose the material: " << endl;
     this->print_materials();
+    if (this->materials.empty())
+    {
+        cout << "No materials available!" << endl;
+        return nullptr;
+    }
     string value;
     int index = -1;
     while (index < 1 || index > this->materials.size())
@@ -461,6 +496,11 @@ Supplier *TobaccoFactory::choose_supplier()
 {
     cout << "Choose the supplier: " << endl;
     this->print_suppliers();
+    if (this->suppliers.empty())
+    {
+        cout << "No suppliers available!" << endl;
+        return nullptr;
+    }
     string value;
     int index = -1;
     while (index < 1 || index > this->suppliers.size())
@@ -480,6 +520,11 @@ Client *TobaccoFactory::choose_client()
 {
     cout << "Choose the client: " << endl;
     this->print_clients();
+    if (this->clients.empty())
+    {
+        cout << "No clients available!" << endl;
+        return nullptr;
+    }
     string value;
     int index = -1;
     while (index < 1 || index > this->clients.size())
